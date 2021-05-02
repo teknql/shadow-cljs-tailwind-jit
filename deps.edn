@@ -1,0 +1,11 @@
+{:paths ["src"]
+ :pablo/config
+ {:github      "teknql/shadow-cljs-tailwind-jit"
+  :desc        "Tailwind JIT buildhooks for Shadow CLJS"
+  :target      :jar
+  :group-id    teknql
+  :artifact-id shadow-cljs-tailwind-jit}
+ :deps
+ {metosin/jsonista {:mvn/version "0.3.2"}
+  funcool/cuerdas  {:mvn/version "2020.03.26-3"}
+  babashka/process {:mvn/version "0.0.2"}}}
