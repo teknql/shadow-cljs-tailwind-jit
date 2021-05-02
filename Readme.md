@@ -14,6 +14,12 @@ npm install --save-dev postcss-cli tailwindcss autoprefixer cssnano
 Add the clojure library to your project via your preferred method (either
 shadow's own `deps` or in your `deps.edn` file).
 
+```clj
+{teknql/shadow-cljs-tailwind-jit
+ {:git/url "https://github.com/teknql/shadow-cljs-tailwind-jit.git"
+  :sha      "01ba6566eb76b58b2caf47ef0ce683974f0dc942"}}
+```
+
 Next, add the required build hooks to your `shadow-cljs.edn` build configuration:
 
 
