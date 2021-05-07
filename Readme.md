@@ -1,4 +1,5 @@
 # Shadow-Cljs Tailwind JIT
+[![Clojars Project](https://img.shields.io/clojars/v/com.teknql/shadow-cljs-tailwind-jit.svg)](https://clojars.org/com.teknql/shadow-cljs-tailwind-jit)
 
 Build hooks for enabling [Tailwind
 JIT](https://tailwindcss.com/docs/just-in-time-mode) within Shadow Projects.
@@ -15,9 +16,8 @@ Add the clojure library to your project via your preferred method (either
 shadow's own `deps` or in your `deps.edn` file).
 
 ```clj
-{teknql/shadow-cljs-tailwind-jit
- {:git/url "https://github.com/teknql/shadow-cljs-tailwind-jit.git"
-  :sha      "01ba6566eb76b58b2caf47ef0ce683974f0dc942"}}
+{com.teknql/shadow-cljs-tailwind-jit
+ {:mvn/version "0.1.0-SNAPSHOT"}}
 ```
 
 Next, add the required build hooks to your `shadow-cljs.edn` build configuration:

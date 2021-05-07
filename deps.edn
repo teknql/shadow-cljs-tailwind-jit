@@ -3,7 +3,7 @@
  {:github      "teknql/shadow-cljs-tailwind-jit"
   :desc        "Tailwind JIT buildhooks for Shadow CLJS"
   :target      :jar
-  :group-id    teknql
+  :group-id    com.teknql
   :artifact-id shadow-cljs-tailwind-jit}
  :deps
  {metosin/jsonista {:mvn/version "0.3.2"}
