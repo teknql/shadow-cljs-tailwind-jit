@@ -5,7 +5,7 @@
   (:import [java.nio.file Files]
            [java.nio.file.attribute FileAttribute]))
 
-(def default-config
+(def default-tailwind-config
   "Default tailwind config"
   {:future   {}
    :purge    []
@@ -63,8 +63,9 @@
                         :devtools
                         :http-root)
         tmp-dir     (create-tmp-tailwind-project!
-                      {:plugins {:tailwindcss {}}}
-                      (merge default-config
+                      (merge {:plugins {:tailwindcss {}}}
+                             (cfg-get config :postcss/config nil))
+                      (merge default-tailwind-config
                              {:purge [(str http-root "/**/*.js")
                                       (str http-root "/**/*.html")]}
                              (cfg-get config :tailwind/config nil)))]
@@ -92,10 +93,11 @@
                         :devtools
                         :http-root)
         tmp-dir     (create-tmp-tailwind-project!
-                      {:plugins {:tailwindcss  {}
-                                 :autoprefixer {}
-                                 :cssnano      {:preset "default"}}}
-                      (merge default-config
+                      (merge {:plugins {:tailwindcss  {}
+                                        :autoprefixer {}
+                                        :cssnano      {:preset "default"}}}
+                             (cfg-get config :postcss/config nil))
+                      (merge default-tailwind-config
                              {:purge [(str http-root "/**/*.js")
                                       (str http-root "/**/*.html")]}
                              (cfg-get config :tailwind/config nil)))]
