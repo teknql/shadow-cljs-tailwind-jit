@@ -76,8 +76,8 @@
        "--watch"
        "-o"
        output-path]
-      {:env {"NODE_ENV"      "development"
-             "TAILWIND_MODE" "watch"}
+      {:extra-env {"NODE_ENV"      "development"
+                   "TAILWIND_MODE" "watch"}
        :err :inherit
        :out :inheirt})
     build-state))
@@ -106,7 +106,7 @@
            tmp-dir
            "-o"
            output-path]
-          {:env {"NODE_ENV"      "production"
-                 "TAILWIND_MODE" "build"}})
+          {:extra-env {"NODE_ENV"      "production"
+                       "TAILWIND_MODE" "build"}})
         deref)
     build-state))
