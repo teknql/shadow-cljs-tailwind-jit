@@ -14,6 +14,10 @@
    :variants {}
    :plugins  []})
 
+(defonce ^{:doc "Static state atom associating shadow-cljs build IDs to their respective state."}
+  projects
+  (atom {}))
+
 (defn- ->json
   "Encode the provided value to JSON"
   [val]
@@ -28,11 +32,17 @@
   [val]
   (str "module.exports = " (->json val) ";"))
 
+(defn- log
+  "Log the provided `strs` to stderr with a prefix determined by the build ID
+  of the passed in `build-cfg`."
+  [build-cfg & strs]
+  (.println *err* (apply str "[" (:build-id build-cfg) "] " strs)))
+
 (defn- cfg-get
   "Behaves identical to `get` but logs the default value back to the user."
   [config key default]
   (or (get config key)
-      (do (println "No build config value for " key ". Using default value.")
+      (do (log config "Using default value for " key ".")
           default)))
 
 (defn create-tmp-tailwind-project!
@@ -58,29 +68,48 @@
   {:shadow.build/stage :configure}
   [build-state]
   (let [config      (:shadow.build/config build-state)
+        build-id    (:build-id config)
+        http-root   (-> config :devtools :http-root)
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
-        http-root   (-> config
-                        :devtools
-                        :http-root)
-        tmp-dir     (create-tmp-tailwind-project!
-                      (merge {:plugins {:tailwindcss {}}}
+        tw-cfg      (merge default-tailwind-config
+                           {:purge [(str http-root "/**/*.js")
+                                    (str http-root "/**/*.html")]}
+                           (cfg-get config :tailwind/config nil))
+        post-cfg    (merge {:plugins {:tailwindcss {}}}
                              (cfg-get config :postcss/config nil))
-                      (merge default-tailwind-config
-                             {:purge [(str http-root "/**/*.js")
-                                      (str http-root "/**/*.html")]}
-                             (cfg-get config :tailwind/config nil)))]
-    (proc/process
-      ["./node_modules/.bin/postcss"
-       (str tmp-dir "/tailwind.css")
-       "--config"
-       tmp-dir
-       "--watch"
-       "-o"
-       output-path]
-      {:extra-env {"NODE_ENV"      "development"
-                   "TAILWIND_MODE" "watch"}
-       :err :inherit
-       :out :inheirt})
+        project-def (get @projects build-id)
+        tmp-dir     (create-tmp-tailwind-project!
+                      post-cfg
+                      tw-cfg)]
+    (when-not (and (= (:tailwind/config project-def)
+                      tw-cfg)
+                   (= (:postcss/config project-def)
+                      post-cfg)
+                   (= (:tailwind/output project-def)
+                      output-path))
+      (if-some [existing-proc (:process project-def)]
+        (do (log config "Restarting postcss process.")
+            (proc/destroy existing-proc))
+        (log config "Starting postcss process."))
+      (swap! projects
+             assoc
+             build-id
+             {:tailwind/config tw-cfg
+              :tailwind/output output-path
+              :postcss/config  post-cfg
+              :process
+              (proc/process
+                ["./node_modules/.bin/postcss"
+                 (str tmp-dir "/tailwind.css")
+                 "--config"
+                 tmp-dir
+                 "--watch"
+                 "-o"
+                 output-path]
+                {:extra-env {"NODE_ENV"      "development"
+                             "TAILWIND_MODE" "watch"}
+                 :err       :inherit
+                 :out       :inheirt})}))
     build-state))
 
 (defn compile-release!
@@ -89,9 +118,7 @@
   [build-state]
   (let [config      (:shadow.build/config build-state)
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
-        http-root   (-> config
-                        :devtools
-                        :http-root)
+        http-root   (-> config :devtools :http-root)
         tmp-dir     (create-tmp-tailwind-project!
                       (merge {:plugins {:tailwindcss  {}
                                         :autoprefixer {}
@@ -101,6 +128,7 @@
                              {:purge [(str http-root "/**/*.js")
                                       (str http-root "/**/*.html")]}
                              (cfg-get config :tailwind/config nil)))]
+    (log config "Generating tailwind output")
     (-> (proc/process
           ["./node_modules/.bin/postcss"
            (str tmp-dir "/tailwind.css")
