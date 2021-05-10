@@ -17,7 +17,7 @@ shadow's own `deps` or in your `deps.edn` file).
 
 ```clj
 {com.teknql/shadow-cljs-tailwind-jit
- {:mvn/version "0.1.0"}}
+ {:mvn/version "0.2.0"}}
 ```
 
 Next, add the required build hooks to your `shadow-cljs.edn` build configuration:
