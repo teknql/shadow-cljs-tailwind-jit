@@ -36,7 +36,7 @@
   "Log the provided `strs` to stderr with a prefix determined by the build ID
   of the passed in `build-cfg`."
   [build-cfg & strs]
-  (.println *err* (apply str "[" (:build-id build-cfg) "] " strs)))
+  (println *err* (apply str "[" (:build-id build-cfg) "] " strs)))
 
 (defn- cfg-get
   "Behaves identical to `get` but logs the default value back to the user."
