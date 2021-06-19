@@ -110,7 +110,7 @@
                 {:extra-env {"NODE_ENV"      "development"
                              "TAILWIND_MODE" "watch"}
                  :err       :inherit
-                 :out       :inheirt})}))
+                 :out       :inherit})}))
     build-state))
 
 (defn compile-release!
