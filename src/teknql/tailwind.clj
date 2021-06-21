@@ -72,6 +72,7 @@
         build-id    (:build-id config)
         http-root   (-> config :devtools :http-root)
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
+        tw-files    (cfg-get config :tailwind/files nil)
         tw-cfg      (merge default-tailwind-config
                            {:purge [(str http-root "/**/*.js")
                                     (str http-root "/**/*.html")]}
@@ -87,7 +88,9 @@
                    (= (:postcss/config project-def)
                       post-cfg)
                    (= (:tailwind/output project-def)
-                      output-path))
+                      output-path)
+                   (= (:tailwind/files project-def)
+                      tw-files))
       (if-some [existing-proc (:process project-def)]
         (do (log config "Restarting postcss process.")
             (proc/destroy existing-proc))
@@ -98,12 +101,17 @@
              {:tailwind/config tw-cfg
               :tailwind/output output-path
               :postcss/config  post-cfg
+              :tailwind/files tw-files
               :process
               (proc/process
                 ["./node_modules/.bin/postcss"
-                 (str tmp-dir "/tailwind.css")
+                 (or
+                  (:tailwind.css tw-files)
+                  (str tmp-dir "/tailwind.css"))
                  "--config"
-                 tmp-dir
+                 (or
+                  (:base-path tw-files)
+                  tmp-dir)
                  "--watch"
                  "-o"
                  output-path]
@@ -119,6 +127,7 @@
   [build-state]
   (let [config      (:shadow.build/config build-state)
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
+        tw-files    (cfg-get config :tailwind/files nil)
         http-root   (-> config :devtools :http-root)
         tmp-dir     (create-tmp-tailwind-project!
                       (merge {:plugins {:tailwindcss  {}
@@ -132,9 +141,13 @@
     (log config "Generating tailwind output")
     (-> (proc/process
           ["./node_modules/.bin/postcss"
-           (str tmp-dir "/tailwind.css")
+           (or
+            (:tailwind.css tw-files)
+            (str tmp-dir "/tailwind.css"))
            "--config"
-           tmp-dir
+           (or
+            (:base-path tw-files)
+            tmp-dir)
            "-o"
            output-path]
           {:extra-env {"NODE_ENV"      "production"
