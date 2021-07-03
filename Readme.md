@@ -17,7 +17,7 @@ shadow's own `deps` or in your `deps.edn` file).
 
 ```clj
 {com.teknql/shadow-cljs-tailwind-jit
- {:mvn/version "0.2.0"}}
+ {:mvn/version "0.2.2"}}
 ```
 
 Next, add the required build hooks to your `shadow-cljs.edn` build configuration:
@@ -53,6 +53,19 @@ The following options are supported via namespaced keys within the `shadow-cljs`
 
 Note that editing either the `:tailwind/config` or `:postcss/config` could result in incompatible
 configurations, so please be careful.
+
+### Using with Tailwind Config Files
+
+If your project is sufficiently complex, you may be best off using the
+`tailwind.config.js`, `postcss.config.js`, and a `.css` file entrypoint. In this
+case you're just using shadow to manage your postcss process. To do this you can
+use the `:tailwind/files` variable.
+
+```clj
+{:tailwind/files
+  {:base-path "./path" ;; Path to directory housing `tailwind.config.js` and `postcss.config.js`
+   :tailwind.css "./path/style.css"}} ;; Path to tailwind entrypoint
+```
 
 ## FAQ
 
