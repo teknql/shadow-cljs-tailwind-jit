@@ -1,5 +1,6 @@
 (ns teknql.tailwind
-  (:require [jsonista.core :as j]
+  (:require [clojure.string]
+            [jsonista.core :as j]
             [cuerdas.core :as str]
             [babashka.process :as proc])
   (:import [java.nio.file Files]
@@ -13,6 +14,13 @@
    :theme    {:extend {}}
    :variants {}
    :plugins  []})
+
+(def postcss-path
+  ^{:doc "The path to the postcss command."}
+  (if (clojure.string/starts-with?
+       (System/getProperty "os.name") "Windows")
+    "./node_modules/.bin/postcss.cmd"
+    "./node_modules/.bin/postcss"))
 
 (defonce ^{:doc "Static state atom associating shadow-cljs build IDs to their respective state."}
   projects
@@ -104,7 +112,7 @@
               :tailwind/files tw-files
               :process
               (proc/process
-                ["./node_modules/.bin/postcss"
+                [postcss-path
                  (or
                   (:tailwind.css tw-files)
                   (str tmp-dir "/tailwind.css"))
@@ -140,7 +148,7 @@
                              (cfg-get config :tailwind/config nil)))]
     (log config "Generating tailwind output")
     (-> (proc/process
-          ["./node_modules/.bin/postcss"
+          [postcss-path
            (or
             (:tailwind.css tw-files)
             (str tmp-dir "/tailwind.css"))
