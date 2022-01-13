@@ -54,18 +54,14 @@
   "Create a temporary tailwind project with the necessary assets to build the project using the JIT.
 
   Return the path to the temporary directory."
-  [postcss-cfg tailwind-cfg]
+  [tailwind-cfg]
   (let [tmp-dir              (-> (Files/createTempDirectory "tailwind" (make-array FileAttribute 0))
                                  (.toFile)
                                  (.getAbsolutePath))
         tmp-css-path         (str tmp-dir "/" "tailwind.css")
-        tmp-tw-cfg-path      (str tmp-dir "/" "tailwind.config.js")
-        tmp-postcss-cfg-path (str tmp-dir "/" "postcss.config.js")]
+        tmp-tw-cfg-path      (str tmp-dir "/" "tailwind.config.js")]
     (spit tmp-css-path "@tailwind base;\n@tailwind components;\n@tailwind utilities;")
     (spit tmp-tw-cfg-path (->export-json tailwind-cfg))
-    (spit tmp-postcss-cfg-path (-> postcss-cfg
-                                   (assoc-in [:plugins :tailwindcss :config] tmp-tw-cfg-path)
-                                   (->export-json)))
     tmp-dir))
 
 (defn start-watch!
@@ -81,16 +77,11 @@
                            {:content [(str http-root "/**/*.js")
                                       (str http-root "/**/*.html")]}
                            (cfg-get config :tailwind/config nil))
-        post-cfg    (merge {:plugins {:tailwindcss {}}}
-                             (cfg-get config :postcss/config nil))
         project-def (get @projects build-id)
         tmp-dir     (create-tmp-tailwind-project!
-                      post-cfg
                       tw-cfg)]
     (when-not (and (= (:tailwind/config project-def)
                       tw-cfg)
-                   (= (:postcss/config project-def)
-                      post-cfg)
                    (= (:tailwind/output project-def)
                       output-path)
                    (= (:tailwind/files project-def)
@@ -105,7 +96,6 @@
              build-id
              {:tailwind/config tw-cfg
               :tailwind/output output-path
-              :postcss/config  post-cfg
               :tailwind/files tw-files
               :process
               (proc/process
@@ -138,10 +128,6 @@
         tw-files    (cfg-get config :tailwind/files nil)
         http-root   (-> config :devtools :http-root)
         tmp-dir     (create-tmp-tailwind-project!
-                      (merge {:plugins {:tailwindcss  {}
-                                        :autoprefixer {}
-                                        :cssnano      {:preset "default"}}}
-                             (cfg-get config :postcss/config nil))
                       (merge default-tailwind-config
                              {:content [(str http-root "/**/*.js")
                                         (str http-root "/**/*.html")]}
