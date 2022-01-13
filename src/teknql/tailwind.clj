@@ -8,19 +8,15 @@
 
 (def default-tailwind-config
   "Default tailwind config"
-  {:future   {}
-   :purge    []
-   :mode     "jit"
-   :theme    {:extend {}}
-   :variants {}
+  {:theme    {:extend {}}
    :plugins  []})
 
-(def postcss-path
-  ^{:doc "The path to the postcss command."}
+(def tailwind-path
+  "The path to the postcss command."
   (if (clojure.string/starts-with?
        (System/getProperty "os.name") "Windows")
-    "./node_modules/.bin/postcss.cmd"
-    "./node_modules/.bin/postcss"))
+    "./node_modules/.bin/tailwindcss.cmd"
+    "./node_modules/.bin/tailwindcss"))
 
 (defonce ^{:doc "Static state atom associating shadow-cljs build IDs to their respective state."}
   projects
@@ -82,8 +78,8 @@
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
         tw-files    (cfg-get config :tailwind/files nil)
         tw-cfg      (merge default-tailwind-config
-                           {:purge [(str http-root "/**/*.js")
-                                    (str http-root "/**/*.html")]}
+                           {:content [(str http-root "/**/*.js")
+                                      (str http-root "/**/*.html")]}
                            (cfg-get config :tailwind/config nil))
         post-cfg    (merge {:plugins {:tailwindcss {}}}
                              (cfg-get config :postcss/config nil))
@@ -100,9 +96,10 @@
                    (= (:tailwind/files project-def)
                       tw-files))
       (if-some [existing-proc (:process project-def)]
-        (do (log config "Restarting postcss process.")
+        (do (log config "Restarting tailwind process.")
             (proc/destroy existing-proc))
-        (log config "Starting postcss process."))
+        (log config "Starting tailwind process."))
+
       (swap! projects
              assoc
              build-id
@@ -112,14 +109,17 @@
               :tailwind/files tw-files
               :process
               (proc/process
-                [postcss-path
+                [tailwind-path
+                 "-i"
                  (or
                   (:tailwind.css tw-files)
                   (str tmp-dir "/tailwind.css"))
                  "--config"
-                 (or
-                  (:base-path tw-files)
-                  tmp-dir)
+                 (str
+                  (or
+                   (:base-path tw-files)
+                   tmp-dir)
+                  "/tailwind.config.js")
                  "--watch"
                  "-o"
                  output-path]
@@ -143,19 +143,23 @@
                                         :cssnano      {:preset "default"}}}
                              (cfg-get config :postcss/config nil))
                       (merge default-tailwind-config
-                             {:purge [(str http-root "/**/*.js")
-                                      (str http-root "/**/*.html")]}
+                             {:content [(str http-root "/**/*.js")
+                                        (str http-root "/**/*.html")]}
                              (cfg-get config :tailwind/config nil)))]
     (log config "Generating tailwind output")
     (-> (proc/process
-          [postcss-path
+          [tailwind-path
+           "-i"
            (or
             (:tailwind.css tw-files)
             (str tmp-dir "/tailwind.css"))
            "--config"
-           (or
-            (:base-path tw-files)
-            tmp-dir)
+           (str
+            (or
+             (:base-path tw-files)
+             tmp-dir)
+            "/tailwind.config.js")
+           "--minify"
            "-o"
            output-path]
           {:extra-env {"NODE_ENV"      "production"
