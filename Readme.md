@@ -9,7 +9,7 @@ JIT](https://tailwindcss.com/docs/just-in-time-mode) within Shadow Projects.
 Install the required node dependencies in your project:
 
 ```
-npm install --save-dev postcss-cli tailwindcss autoprefixer cssnano
+npm install --save-dev postcss postcss-cli tailwindcss autoprefixer cssnano
 ```
 
 Add the clojure library to your project via your preferred method (either
