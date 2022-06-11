@@ -9,7 +9,7 @@ JIT](https://tailwindcss.com/docs/just-in-time-mode) within Shadow Projects.
 Install the required node dependencies in your project:
 
 ```
-npm install --save-dev postcss postcss-cli tailwindcss autoprefixer cssnano
+npm install --save-dev tailwindcss@^3.1.2
 ```
 
 Add the clojure library to your project via your preferred method (either
@@ -17,7 +17,7 @@ shadow's own `deps` or in your `deps.edn` file).
 
 ```clj
 {com.teknql/shadow-cljs-tailwind-jit
- {:mvn/version "0.2.2"}}
+ {:mvn/version "1.0.0"}}
 ```
 
 Next, add the required build hooks to your `shadow-cljs.edn` build configuration:
@@ -48,22 +48,20 @@ The following options are supported via namespaced keys within the `shadow-cljs`
   `resources/public/css/site.css`
 - `:tailwind/config` - A map that is used for the `tailwind.config.js`. Automatically encodes kebab
   cased keys into camel cased.
-- `:postcss/config` - A map that is used for the `postcss.config.js`. Automatically encodes kebab
-  cased keys into camel cased.
 
-Note that editing either the `:tailwind/config` or `:postcss/config` could result in incompatible
+Note that editing the `:tailwind/config` could result in incompatible
 configurations, so please be careful.
 
 ### Using with Tailwind Config Files
 
 If your project is sufficiently complex, you may be best off using the
-`tailwind.config.js`, `postcss.config.js`, and a `.css` file entrypoint. In this
-case you're just using shadow to manage your postcss process. To do this you can
+`tailwind.config.js`, and a `.css` file entrypoint. In this
+case you're just using shadow to manage your tailwindcss process. To do this you can
 use the `:tailwind/files` variable.
 
 ```clj
 {:tailwind/files
-  {:base-path "./path" ;; Path to directory housing `tailwind.config.js` and `postcss.config.js`
+  {:base-path "./path" ;; Path to directory housing `tailwind.config.js`
    :tailwind.css "./path/style.css"}} ;; Path to tailwind entrypoint
 ```
 
