@@ -70,12 +70,14 @@
   [build-state]
   (let [config      (:shadow.build/config build-state)
         build-id    (:build-id config)
+        out-dir     (:output-dir config)
         http-root   (-> config :devtools :http-root)
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
         tw-files    (cfg-get config :tailwind/files nil)
         tw-cfg      (merge default-tailwind-config
-                           {:content [(str http-root "/**/*.js")
-                                      (str http-root "/**/*.html")]}
+                           {:content
+                             [(str http-root "/**/*.html")
+                              (str out-dir "/cljs-runtime/*.js")]}
                            (cfg-get config :tailwind/config nil))
         project-def (get @projects build-id)
         tmp-dir     (create-tmp-tailwind-project!
@@ -127,10 +129,14 @@
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
         tw-files    (cfg-get config :tailwind/files nil)
         http-root   (-> config :devtools :http-root)
+        output-dir  (-> config :output-dir)
+        modules     (->> config :modules keys (mapv name))
         tmp-dir     (create-tmp-tailwind-project!
                       (merge default-tailwind-config
-                             {:content [(str http-root "/**/*.js")
-                                        (str http-root "/**/*.html")]}
+                             {:content
+                              (into [(str http-root "/**/*.html")]
+                                    (for [m modules]
+                                      (str output-dir "/" m ".js")))}
                              (cfg-get config :tailwind/config nil)))]
     (log config "Generating tailwind output")
     (-> (proc/process
