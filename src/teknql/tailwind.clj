@@ -71,7 +71,7 @@
   (let [config      (:shadow.build/config build-state)
         build-id    (:build-id config)
         out-dir     (:output-dir config)
-        http-root   (-> config :devtools :http-root)
+        http-root   (or (-> config :devtools :http-root) "resources/public")
         output-path (cfg-get config :tailwind/output "resources/public/css/site.css")
         tw-files    (cfg-get config :tailwind/files nil)
         tw-cfg      (merge default-tailwind-config
